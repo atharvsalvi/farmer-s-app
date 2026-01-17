@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:farmer/widgets/glass_container.dart';
+import 'package:farmer/screens/purchase_screen.dart';
 
 class CropDetailsScreen extends StatefulWidget {
   final String cropName;
@@ -298,6 +299,37 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
                           );
                         },
                       ),
+                      
+                      // Buy Now Button (Only in Buy Mode)
+                      if (!widget.isSelling && bestDeal != null)
+                        Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(top: 20),
+                          height: 55,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PurchaseScreen(
+                                    cropName: widget.cropName,
+                                    pricePerQt: (bestDeal['price'] as num).toDouble(),
+                                    marketName: bestDeal['market_name'],
+                                  ),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                              elevation: 5,
+                            ),
+                            child: Text(
+                              'Buy Now',
+                              style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),

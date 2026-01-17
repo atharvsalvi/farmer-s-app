@@ -37,12 +37,8 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
     });
 
     try {
-      // Use localhost for Android Emulator (10.0.2.2) vs Web (localhost)
-      // Note: On web, localhost refers to the machine running the browser.
-      // Make sure your backend enables CORS.
-      final String baseUrl = kIsWeb
-          ? 'http://localhost:3000'
-          : 'http://10.0.2.2:3000';
+      // Use Deployed Backend
+      final String baseUrl = 'https://farmer-backend-5rka.onrender.com';
       var uri = Uri.parse('$baseUrl/predict');
       var request = http.MultipartRequest('POST', uri);
 

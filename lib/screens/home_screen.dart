@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:farmer/widgets/glass_container.dart';
 import 'package:farmer/screens/market_screen.dart';
+import 'package:farmer/screens/purchase_history_screen.dart';
+import 'package:farmer/screens/add_crop_screen.dart';
 import 'package:farmer/screens/disease_detection_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -24,6 +26,15 @@ class _HomeScreenState extends State<HomeScreen> {
   String _location = 'Locating...';
   IconData _weatherIcon = Icons.cloud;
   bool _isLoadingWeather = true;
+
+  // Crops State
+  List<Map<String, dynamic>> _currentCrops = [
+    {'name': 'Wheat', 'line1': 'Sown: 10 Jan', 'line2': 'Stage: Germination', 'color': Colors.orange},
+    {'name': 'Mustard', 'line1': 'Sown: 15 Jan', 'line2': 'Stage: Seedling', 'color': Colors.yellow},
+  ];
+
+  // ... (initState and _initWeather remain same)
+  
   // final String _apiKey = 'YOUR_API_KEY'; // API Key removed to prevent exhaustion
 
   @override
@@ -74,6 +85,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.history, color: Colors.black87),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PurchaseHistoryScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: Colors.black87),
             onPressed: () {},
@@ -147,8 +167,27 @@ class _HomeScreenState extends State<HomeScreen> {
             // Add Crop Bar
             _buildSectionHeader('Plan New Crop'),
             GestureDetector(
-              onTap: () {
-                // Navigate to add crop page
+              onTap: () async {
+                final newCrop = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddCropScreen(
+                      currentTemperature: _temperature,
+                      currentWeather: _condition,
+                    ),
+                  ),
+                );
+
+                if (newCrop != null) {
+                  setState(() {
+                    _currentCrops.add({
+                      'name': newCrop['name'],
+                      'line1': 'Sown: ${newCrop['sowingDate']}',
+                      'line2': 'Stage: ${newCrop['stage']}',
+                      'color': newCrop['color'],
+                    });
+                  });
+                }
               },
               child: Container(
                 width: double.infinity,
@@ -177,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(width: 15),
                     Text(
-                      'Add Crop',
+                      'Add New Crop',
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -196,12 +235,18 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildSectionHeader('Current Crops'),
             SizedBox(
               height: 140,
-              child: ListView(
+              child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                children: [
-                  _buildCropCard('Wheat', 'Sown: 10 Jan', 'Stage: Germination', Colors.orange),
-                  _buildCropCard('Mustard', 'Sown: 15 Jan', 'Stage: Seedling', Colors.yellow),
-                ],
+                itemCount: _currentCrops.length,
+                itemBuilder: (context, index) {
+                  final crop = _currentCrops[index];
+                  return _buildCropCard(
+                    crop['name'],
+                    crop['line1'],
+                    crop['line2'],
+                    crop['color'] ?? Colors.green,
+                  );
+                },
               ),
             ),
             const SizedBox(height: 25),
