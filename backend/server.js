@@ -64,6 +64,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+const db = require('./utils/jsonOfficerDB');
+
+// === FARMER API ===
+
 app.post('/predict', upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No image file uploaded' });
@@ -99,6 +103,17 @@ app.post('/predict', upload.single('image'), (req, res) => {
 
         try {
             const jsonResponse = JSON.parse(dataString.trim());
+
+            // LOG DETECTION TO DB
+            if (jsonResponse.status === 'Unhealthy') {
+                db.addReport({
+                    disease: jsonResponse.detected,
+                    confidence: jsonResponse.confidence,
+                    location: 'Pune (Demo)', // Mock location for now
+                    image: req.file.filename // Store filename reference
+                });
+            }
+
             res.json(jsonResponse);
         } catch (e) {
             console.error("Error parsing JSON:", e);
@@ -106,6 +121,44 @@ app.post('/predict', upload.single('image'), (req, res) => {
             res.status(500).json({ error: 'Invalid response from model', details: dataString });
         }
     });
+});
+
+app.get('/api/advisories', (req, res) => {
+    const advisories = db.getAdvisories();
+    res.json(advisories);
+});
+
+
+// === OFFICER API ===
+
+app.get('/api/officer/stats', (req, res) => {
+    const reports = db.getReports();
+
+    // Aggregation Logic
+    const diseaseCounts = {};
+    reports.forEach(r => {
+        diseaseCounts[r.disease] = (diseaseCounts[r.disease] || 0) + 1;
+    });
+
+    res.json({
+        totalReports: reports.length,
+        diseaseCounts: diseaseCounts,
+        recentReports: reports.slice(-5).reverse() // Last 5
+    });
+});
+
+app.post('/api/officer/advisories', (req, res) => {
+    const { title, message, targetRegion, severity } = req.body;
+    if (!title || !message) return res.status(400).json({ error: "Missing fields" });
+
+    const newAdvisory = db.addAdvisory({
+        title,
+        message,
+        targetRegion: targetRegion || "All",
+        severity: severity || "Info"
+    });
+
+    res.json(newAdvisory);
 });
 
 app.listen(port, () => {

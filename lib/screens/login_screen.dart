@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:farmer/widgets/glass_container.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:farmer/screens/home_screen.dart';
+import 'package:farmer/screens/officer_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool otpSent = false;
   bool isLoading = false;
   String? _generatedOtp; // Store the generated OTP locally
-  
+
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
 
@@ -32,7 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
   // TWILIO CREDENTIALS (REPLACE THESE WITH YOUR ACTUAL KEYS)
   final String _twilioAccountSid = 'YOUR_TWILIO_ACCOUNT_SID';
   final String _twilioAuthToken = 'YOUR_TWILIO_AUTH_TOKEN';
-  final String _twilioPhoneNumber = 'YOUR_TWILIO_PHONE_NUMBER'; // e.g., +1234567890
+  final String _twilioPhoneNumber =
+      'YOUR_TWILIO_PHONE_NUMBER'; // e.g., +1234567890
 
   void _navigateToAuth(bool registering) {
     setState(() {
@@ -62,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleGetOtp() async {
     String phone = _mobileController.text.trim();
-    
+
     // 1. Validate 10-digit number
     if (phone.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(phone)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -87,8 +90,9 @@ class _LoginScreenState extends State<LoginScreen> {
     // 3. Send OTP via Backend
     try {
       // Use Deployed Backend
-      final url = Uri.parse('https://farmer-backend-5rka.onrender.com/send-otp');
-      
+      final String baseUrl = 'https://farmer-backend-5rka.onrender.com';
+      final url = Uri.parse('$baseUrl/send-otp');
+
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -111,11 +115,13 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           isLoading = false;
           // Fallback for demo if backend fails (e.g. server not running)
-          otpSent = true; 
+          otpSent = true;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Backend Failed (Is server running?). Mock OTP: $otp'),
+            content: Text(
+              'Backend Failed (Is server running?). Mock OTP: $otp',
+            ),
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 5),
           ),
@@ -126,11 +132,13 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         isLoading = false;
         // Fallback for demo
-        otpSent = true; 
+        otpSent = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Connection Failed (Is server running?). Mock OTP: $otp'),
+          content: Text(
+            'Connection Failed (Is server running?). Mock OTP: $otp',
+          ),
           backgroundColor: Colors.orange,
           duration: const Duration(seconds: 5),
         ),
@@ -140,11 +148,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleSubmit() {
     String enteredOtp = _otpController.text.trim();
-    
-    if (enteredOtp == _generatedOtp || enteredOtp == '1234') { // Backdoor for testing
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+
+    if (enteredOtp == _generatedOtp || enteredOtp == '1234') {
+      // Backdoor for testing
+      if (isFarmer) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const OfficerDashboardScreen(),
+          ),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -166,11 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  _lightGreen,
-                  _primaryGreen,
-                  _darkGreen,
-                ],
+                colors: [_lightGreen, _primaryGreen, _darkGreen],
               ),
             ),
           ),
@@ -244,7 +257,8 @@ class _LoginScreenState extends State<LoginScreen> {
               borderRadius: BorderRadius.circular(20),
               image: const DecorationImage(
                 image: NetworkImage(
-                    'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1000&auto=format&fit=crop'),
+                  'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1000&auto=format&fit=crop',
+                ),
                 fit: BoxFit.cover,
               ),
             ),
@@ -264,13 +278,10 @@ class _LoginScreenState extends State<LoginScreen> {
           Text(
             'AI-powered insights for optimal crop growth and yield.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.white70,
-            ),
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.white70),
           ),
           const SizedBox(height: 40),
-          
+
           // Buttons Row
           Container(
             padding: const EdgeInsets.all(5),
@@ -360,10 +371,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? 'Join the smart farming revolution'
                 : 'Welcome back, you\'ve been missed!',
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.white70,
-            ),
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.white70),
           ),
           const SizedBox(height: 30),
 
@@ -478,16 +486,16 @@ class _LoginScreenState extends State<LoginScreen> {
             child: ElevatedButton(
               onPressed: otpSent ? _handleSubmit : _handleGetOtp,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF66BB6A), // Lighter green for button
+                backgroundColor: const Color(
+                  0xFF66BB6A,
+                ), // Lighter green for button
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
                 elevation: 5,
               ),
               child: Text(
-                otpSent
-                    ? (isRegistering ? 'Register' : 'Login')
-                    : 'Get OTP',
+                otpSent ? (isRegistering ? 'Register' : 'Login') : 'Get OTP',
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -497,7 +505,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          
+
           // Switch Mode Link
           GestureDetector(
             onTap: () {
@@ -508,7 +516,9 @@ class _LoginScreenState extends State<LoginScreen> {
               });
             },
             child: Text(
-              isRegistering ? 'Already a member? Login' : 'Not a member? Register',
+              isRegistering
+                  ? 'Already a member? Login'
+                  : 'Not a member? Register',
               style: GoogleFonts.poppins(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
