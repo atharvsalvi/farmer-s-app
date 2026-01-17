@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:farmer/widgets/auto_translated_text.dart';
 
 class PurchaseHistoryScreen extends StatefulWidget {
   const PurchaseHistoryScreen({super.key});
@@ -40,7 +41,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: Text(
+        title: AutoTranslatedText(
           'Purchase History',
           style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.bold),
         ),
@@ -57,7 +58,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
                     children: [
                       Icon(Icons.history, size: 80, color: Colors.grey[300]),
                       const SizedBox(height: 20),
-                      Text(
+                      AutoTranslatedText(
                         'No purchases yet',
                         style: GoogleFonts.poppins(color: Colors.grey, fontSize: 16),
                       ),
@@ -92,7 +93,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
+                              AutoTranslatedText(
                                 item['cropName'],
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.bold,
@@ -110,7 +111,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
                             ],
                           ),
                           const SizedBox(height: 5),
-                          Text(
+                          AutoTranslatedText(
                             '${item['quantity']} Quintals from ${item['marketName']}',
                             style: GoogleFonts.poppins(
                               color: Colors.black87,

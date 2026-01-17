@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:farmer/screens/crop_details_screen.dart';
+import 'package:farmer/widgets/auto_translated_text.dart';
+import 'package:farmer/widgets/auto_translated_text_field.dart';
 
 class MarketScreen extends StatefulWidget {
   const MarketScreen({super.key});
@@ -66,7 +68,7 @@ class _MarketScreenState extends State<MarketScreen> with SingleTickerProviderSt
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text(
+        title: AutoTranslatedText(
           'Marketplace',
           style: GoogleFonts.poppins(
             color: Colors.black87,
@@ -81,8 +83,8 @@ class _MarketScreenState extends State<MarketScreen> with SingleTickerProviderSt
           indicatorColor: Colors.green,
           labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.bold),
           tabs: const [
-            Tab(text: 'Buy Crops'),
-            Tab(text: 'Sell Crops'),
+            Tab(child: AutoTranslatedText('Buy Crops')),
+            Tab(child: AutoTranslatedText('Sell Crops')),
           ],
         ),
       ),
@@ -104,17 +106,15 @@ class _MarketScreenState extends State<MarketScreen> with SingleTickerProviderSt
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: TextField(
+          child: AutoTranslatedTextField(
             controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search crops to buy...',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide.none,
-              ),
+            hintText: 'Search crops to buy...',
+            prefixIcon: const Icon(Icons.search),
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide.none,
             ),
           ),
         ),
@@ -141,11 +141,11 @@ class _MarketScreenState extends State<MarketScreen> with SingleTickerProviderSt
                         Container(width: 60, height: 60, color: Colors.grey[300], child: const Icon(Icons.grass)),
                     ),
                   ),
-                  title: Text(
+                  title: AutoTranslatedText(
                     crop['name'],
                     style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text(
+                  subtitle: AutoTranslatedText(
                     'Growth Time: ${crop['growth_time']}',
                     style: GoogleFonts.poppins(fontSize: 12),
                   ),
@@ -163,7 +163,7 @@ class _MarketScreenState extends State<MarketScreen> with SingleTickerProviderSt
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                     ),
-                    child: Text('View Details', style: GoogleFonts.poppins(color: Colors.white)),
+                    child: AutoTranslatedText('View Details', style: GoogleFonts.poppins(color: Colors.white)),
                   ),
                 ),
               );
@@ -182,17 +182,15 @@ class _MarketScreenState extends State<MarketScreen> with SingleTickerProviderSt
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: TextField(
+          child: AutoTranslatedTextField(
             controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search crops to sell...',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide.none,
-              ),
+            hintText: 'Search crops to sell...',
+            prefixIcon: const Icon(Icons.search),
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide.none,
             ),
           ),
         ),
@@ -219,11 +217,11 @@ class _MarketScreenState extends State<MarketScreen> with SingleTickerProviderSt
                         Container(width: 60, height: 60, color: Colors.grey[300], child: const Icon(Icons.grass)),
                     ),
                   ),
-                  title: Text(
+                  title: AutoTranslatedText(
                     crop['name'],
                     style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text(
+                  subtitle: AutoTranslatedText(
                     'Growth Time: ${crop['growth_time']}',
                     style: GoogleFonts.poppins(fontSize: 12),
                   ),
@@ -244,7 +242,7 @@ class _MarketScreenState extends State<MarketScreen> with SingleTickerProviderSt
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                     ),
-                    child: Text('Sell Details', style: GoogleFonts.poppins(color: Colors.white)),
+                    child: AutoTranslatedText('Sell Now', style: GoogleFonts.poppins(color: Colors.white)),
                   ),
                 ),
               );

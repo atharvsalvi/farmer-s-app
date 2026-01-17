@@ -3,10 +3,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:farmer/widgets/glass_container.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:farmer/screens/home_screen.dart';
 import 'package:farmer/screens/officer_dashboard_screen.dart';
+import 'package:farmer/providers/language_provider.dart';
+import 'package:farmer/widgets/auto_translated_text.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool otpSent = false;
   bool isLoading = false;
   String? _generatedOtp; // Store the generated OTP locally
-
+  
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
 
@@ -34,8 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // TWILIO CREDENTIALS (REPLACE THESE WITH YOUR ACTUAL KEYS)
   final String _twilioAccountSid = 'YOUR_TWILIO_ACCOUNT_SID';
   final String _twilioAuthToken = 'YOUR_TWILIO_AUTH_TOKEN';
-  final String _twilioPhoneNumber =
-      'YOUR_TWILIO_PHONE_NUMBER'; // e.g., +1234567890
+  final String _twilioPhoneNumber = 'YOUR_TWILIO_PHONE_NUMBER'; // e.g., +1234567890
 
   void _navigateToAuth(bool registering) {
     setState(() {
@@ -69,25 +71,14 @@ class _LoginScreenState extends State<LoginScreen> {
     // 1. Validate 10-digit number
     if (phone.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(phone)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid 10-digit mobile number'),
-          backgroundColor: Colors.red,
-        ),
+        const SnackBar(content: AutoTranslatedText('Please enter a valid 10-digit mobile number'), backgroundColor: Colors.red),
       );
       return;
     }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    // 2. Generate OTP
+    setState(() => isLoading = true);
     String otp = _generateRandomOtp();
-    setState(() {
-      _generatedOtp = otp;
-    });
+    setState(() => _generatedOtp = otp);
 
-    // 3. Send OTP via Backend
     try {
       // Use Deployed Backend
       final String baseUrl = 'https://farmer-backend-5rka.onrender.com';
@@ -96,20 +87,12 @@ class _LoginScreenState extends State<LoginScreen> {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'phone': '+91$phone', // Assuming India (+91)
-          'otp': otp,
-        }),
+        body: jsonEncode({'phone': '+91$phone', 'otp': otp}),
       );
 
       if (response.statusCode == 200) {
-        setState(() {
-          otpSent = true;
-          isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('OTP Sent successfully via Backend!')),
-        );
+        setState(() { otpSent = true; isLoading = false; });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: AutoTranslatedText('OTP Sent successfully via Backend!')));
       } else {
         print('Backend Error: ${response.body}');
         setState(() {
@@ -119,9 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Backend Failed (Is server running?). Mock OTP: $otp',
-            ),
+            content: AutoTranslatedText('Backend Failed. Mock OTP: $otp'),
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 5),
           ),
@@ -136,9 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Connection Failed (Is server running?). Mock OTP: $otp',
-          ),
+          content: AutoTranslatedText('Connection Failed. Mock OTP: $otp'),
           backgroundColor: Colors.orange,
           duration: const Duration(seconds: 5),
         ),
@@ -163,12 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Invalid OTP'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: AutoTranslatedText('Invalid OTP'), backgroundColor: Colors.red));
     }
   }
 
@@ -177,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Green Nature Gradient Background
+          // Background
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -226,16 +200,42 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // Loading Indicator
-          if (isLoading)
-            Container(
-              color: Colors.black54,
-              child: const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-            ),
+          // Language Selector (Bottom Right)
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: _buildLanguageSelector(),
+          ),
+
+          // Loading
+          if (isLoading) Container(color: Colors.black54, child: const Center(child: CircularProgressIndicator(color: Colors.white))),
         ],
       ),
+    );
+  }
+
+  Widget _buildLanguageSelector() {
+    return Consumer<LanguageProvider>(
+      builder: (context, provider, child) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+          ),
+          child: PopupMenuButton<Locale>(
+            icon: const Icon(Icons.language, color: Colors.green),
+            onSelected: (Locale locale) {
+              provider.changeLanguage(locale);
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<Locale>>[
+              const PopupMenuItem<Locale>(value: Locale('en'), child: Text('English')),
+              const PopupMenuItem<Locale>(value: Locale('hi'), child: Text('हिंदी')),
+              const PopupMenuItem<Locale>(value: Locale('mr'), child: Text('मराठी')),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -248,7 +248,6 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Dummy Image Area
           Container(
             height: 250,
             width: double.infinity,
@@ -264,19 +263,14 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           const SizedBox(height: 30),
-          Text(
-            'Smart Farming\nFor a Better Future',
+          AutoTranslatedText(
+            'Welcome to Farmer App',
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              height: 1.2,
-            ),
+            style: GoogleFonts.poppins(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white, height: 1.2),
           ),
           const SizedBox(height: 15),
-          Text(
-            'AI-powered insights for optimal crop growth and yield.',
+          AutoTranslatedText(
+            'Your companion for smart farming',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(fontSize: 14, color: Colors.white70),
           ),
@@ -285,51 +279,22 @@ class _LoginScreenState extends State<LoginScreen> {
           // Buttons Row
           Container(
             padding: const EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
+            decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
             child: Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => _navigateToAuth(true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: _primaryGreen,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: Text(
-                      'Register',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: _primaryGreen, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), padding: const EdgeInsets.symmetric(vertical: 16)),
+                    child: AutoTranslatedText('Register', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: TextButton(
                     onPressed: () => _navigateToAuth(false),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    child: Text(
-                      'Sign In',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+                    style: TextButton.styleFrom(foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                    child: AutoTranslatedText('Login', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
                   ),
                 ),
               ],
@@ -349,137 +314,46 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: _backToWelcome,
-            ),
-          ),
+          Align(alignment: Alignment.topLeft, child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: _backToWelcome)),
           const SizedBox(height: 10),
-          Text(
+          AutoTranslatedText(
             isRegistering ? 'Create Account' : 'Hello Again!',
-            style: GoogleFonts.poppins(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 10),
-          Text(
-            isRegistering
-                ? 'Join the smart farming revolution'
-                : 'Welcome back, you\'ve been missed!',
+          AutoTranslatedText(
+            isRegistering ? 'Join the agricultural revolution' : 'Welcome back to your dashboard',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(fontSize: 14, color: Colors.white70),
           ),
           const SizedBox(height: 30),
-
-          // User Type Toggle
           Container(
             padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(30),
-            ),
+            decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(30)),
             child: Row(
               children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _toggleUserType(true),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: isFarmer ? Colors.white : Colors.transparent,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Farmer',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w600,
-                            color: isFarmer ? _primaryGreen : Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _toggleUserType(false),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: !isFarmer ? Colors.white : Colors.transparent,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Agri Officer',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w600,
-                            color: !isFarmer ? _primaryGreen : Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                Expanded(child: GestureDetector(onTap: () => _toggleUserType(true), child: Container(padding: const EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(color: isFarmer ? Colors.white : Colors.transparent, borderRadius: BorderRadius.circular(25)), child: Center(child: AutoTranslatedText('Farmer', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: isFarmer ? _primaryGreen : Colors.white)))))),
+                Expanded(child: GestureDetector(onTap: () => _toggleUserType(false), child: Container(padding: const EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(color: !isFarmer ? Colors.white : Colors.transparent, borderRadius: BorderRadius.circular(25)), child: Center(child: AutoTranslatedText('Agri Officer', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: !isFarmer ? _primaryGreen : Colors.white)))))),
               ],
             ),
           ),
           const SizedBox(height: 30),
-
-          // Mobile Input
           TextField(
             controller: _mobileController,
             style: const TextStyle(color: Colors.white),
             keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-              hintText: 'Mobile Number (10 digits)',
-              hintStyle: const TextStyle(color: Colors.white60),
-              prefixIcon: const Icon(Icons.phone, color: Colors.white70),
-              filled: true,
-              fillColor: Colors.white.withOpacity(0.1),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(color: Colors.white),
-              ),
-            ),
+            decoration: InputDecoration(hintText: 'Mobile Number', hintStyle: const TextStyle(color: Colors.white60), prefixIcon: const Icon(Icons.phone, color: Colors.white70), filled: true, fillColor: Colors.white.withOpacity(0.1), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide(color: Colors.white.withOpacity(0.3))), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.white))),
           ),
           const SizedBox(height: 20),
-
-          // OTP Input (Conditional)
           if (otpSent) ...[
             TextField(
               controller: _otpController,
               style: const TextStyle(color: Colors.white),
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: 'Enter 6-digit OTP',
-                hintStyle: const TextStyle(color: Colors.white60),
-                prefixIcon: const Icon(Icons.lock, color: Colors.white70),
-                filled: true,
-                fillColor: Colors.white.withOpacity(0.1),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: const BorderSide(color: Colors.white),
-                ),
-              ),
+              decoration: InputDecoration(hintText: 'Enter OTP', hintStyle: const TextStyle(color: Colors.white60), prefixIcon: const Icon(Icons.lock, color: Colors.white70), filled: true, fillColor: Colors.white.withOpacity(0.1), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide(color: Colors.white.withOpacity(0.3))), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.white))),
             ),
             const SizedBox(height: 20),
           ],
-
-          // Action Button
           SizedBox(
             width: double.infinity,
             height: 55,
@@ -494,7 +368,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 elevation: 5,
               ),
-              child: Text(
+              child: AutoTranslatedText(
                 otpSent ? (isRegistering ? 'Register' : 'Login') : 'Get OTP',
                 style: GoogleFonts.poppins(
                   fontSize: 18,
@@ -515,7 +389,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 _otpController.clear();
               });
             },
-            child: Text(
+            child: AutoTranslatedText(
               isRegistering
                   ? 'Already a member? Login'
                   : 'Not a member? Register',

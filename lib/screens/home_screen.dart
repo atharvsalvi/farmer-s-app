@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 import 'package:farmer/widgets/glass_container.dart';
 import 'package:farmer/screens/market_screen.dart';
 import 'package:farmer/screens/purchase_history_screen.dart';
 import 'package:farmer/screens/add_crop_screen.dart';
 import 'package:farmer/screens/disease_detection_screen.dart';
+import 'package:farmer/providers/language_provider.dart';
+import 'package:farmer/widgets/auto_translated_text.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -33,10 +36,6 @@ class _HomeScreenState extends State<HomeScreen> {
     {'name': 'Mustard', 'line1': 'Sown: 15 Jan', 'line2': 'Stage: Seedling', 'color': Colors.yellow},
   ];
 
-  // ... (initState and _initWeather remain same)
-  
-  // final String _apiKey = 'YOUR_API_KEY'; // API Key removed to prevent exhaustion
-
   @override
   void initState() {
     super.initState();
@@ -58,10 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Future<Position> _determinePosition() async { ... } // Removed to avoid unnecessary permission requests if not using API
-
-  // Future<void> _fetchWeather(double lat, double lon) async { ... } // Removed API call
-
   void _checkMarketPrice() {
     if (_marketCropController.text.isNotEmpty) {
       setState(() {
@@ -77,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(
+        title: AutoTranslatedText(
           'Farmer Dashboard',
           style: GoogleFonts.poppins(
             color: Colors.black87,
@@ -85,6 +80,22 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
+          // Language Selector
+          Consumer<LanguageProvider>(
+            builder: (context, provider, child) {
+              return PopupMenuButton<Locale>(
+                icon: const Icon(Icons.language, color: Colors.black87),
+                onSelected: (Locale locale) {
+                  provider.changeLanguage(locale);
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<Locale>>[
+                  const PopupMenuItem<Locale>(value: Locale('en'), child: Text('English')),
+                  const PopupMenuItem<Locale>(value: Locale('hi'), child: Text('हिंदी')),
+                  const PopupMenuItem<Locale>(value: Locale('mr'), child: Text('मराठी')),
+                ],
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.history, color: Colors.black87),
             onPressed: () {
@@ -133,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            AutoTranslatedText(
                               'Today\'s Weather',
                               style: GoogleFonts.poppins(
                                 color: Colors.white,
@@ -149,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
+                            AutoTranslatedText(
                               '$_condition, $_location',
                               style: GoogleFonts.poppins(
                                 color: Colors.white70,
@@ -215,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: const Icon(Icons.add, color: Colors.green),
                     ),
                     const SizedBox(width: 15),
-                    Text(
+                    AutoTranslatedText(
                       'Add New Crop',
                       style: GoogleFonts.poppins(
                         fontSize: 18,
@@ -306,15 +317,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Check Crop Health',
+                        AutoTranslatedText(
+                          'Check Health',
                           style: GoogleFonts.poppins(
                             color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
+                        AutoTranslatedText(
                           'Detect Diseases & Gets Cures',
                           style: GoogleFonts.poppins(
                             color: Colors.white.withOpacity(0.9),
@@ -372,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        AutoTranslatedText(
                           'Marketplace',
                           style: GoogleFonts.poppins(
                             color: Colors.white,
@@ -380,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
+                        AutoTranslatedText(
                           'Buy & Sell Crops',
                           style: GoogleFonts.poppins(
                             color: Colors.white.withOpacity(0.9),
@@ -405,7 +416,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15.0, left: 5),
-      child: Text(
+      child: AutoTranslatedText(
         title,
         style: GoogleFonts.poppins(
           fontSize: 18,
@@ -444,7 +455,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Icon(Icons.grass, color: color, size: 20),
           ),
           const Spacer(),
-          Text(
+          AutoTranslatedText(
             name,
             style: GoogleFonts.poppins(
               fontWeight: FontWeight.bold,
@@ -452,11 +463,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 5),
-          Text(
+          AutoTranslatedText(
             line1,
             style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
           ),
-          Text(
+          AutoTranslatedText(
             line2,
             style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
           ),

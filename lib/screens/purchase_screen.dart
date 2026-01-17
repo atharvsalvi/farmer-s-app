@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:farmer/widgets/auto_translated_text.dart';
 
 class PurchaseScreen extends StatefulWidget {
   final String cropName;
@@ -66,10 +67,10 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
             children: [
               const Icon(Icons.check_circle, color: Colors.green, size: 60),
               const SizedBox(height: 10),
-              Text('Purchase Successful!', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+              AutoTranslatedText('Purchase Successful!', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
             ],
           ),
-          content: Text(
+          content: AutoTranslatedText(
             'You have successfully purchased $_quantity Quintals of ${widget.cropName} from ${widget.marketName}.',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(),
@@ -81,7 +82,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                 Navigator.of(context).pop(); // Close Purchase Screen
                 Navigator.of(context).pop(); // Close Details Screen
               },
-              child: Text('Done', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.green)),
+              child: AutoTranslatedText('Done', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.green)),
             ),
           ],
         ),
@@ -94,7 +95,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: Text('Confirm Purchase', style: GoogleFonts.poppins(color: Colors.black)),
+        title: AutoTranslatedText('Confirm Purchase', style: GoogleFonts.poppins(color: Colors.black)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -123,23 +124,23 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Crop', style: GoogleFonts.poppins(color: Colors.grey)),
-                      Text(widget.cropName, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+                      AutoTranslatedText('Crop', style: GoogleFonts.poppins(color: Colors.grey)),
+                      AutoTranslatedText(widget.cropName, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
                     ],
                   ),
                   const Divider(height: 30),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Market', style: GoogleFonts.poppins(color: Colors.grey)),
-                      Text(widget.marketName, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                      AutoTranslatedText('Market', style: GoogleFonts.poppins(color: Colors.grey)),
+                      AutoTranslatedText(widget.marketName, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Price per Qt', style: GoogleFonts.poppins(color: Colors.grey)),
+                      AutoTranslatedText('Price per Qt', style: GoogleFonts.poppins(color: Colors.grey)),
                       Text('₹${widget.pricePerQt}', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
                     ],
                   ),
@@ -149,7 +150,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
             const SizedBox(height: 30),
 
             // Quantity Selector
-            Text('Select Quantity (Quintals)', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+            AutoTranslatedText('Select Quantity (Quintals)', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 15),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -202,7 +203,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Total Amount', style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[600])),
+                      AutoTranslatedText('Total Amount', style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[600])),
                       Text(
                         '₹${_totalPrice.toStringAsFixed(0)}',
                         style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green),
@@ -222,7 +223,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                       ),
                       child: _isProcessing
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : Text(
+                          : AutoTranslatedText(
                               'Confirm Purchase',
                               style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                             ),

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:farmer/widgets/glass_container.dart';
 import 'package:farmer/screens/purchase_screen.dart';
+import 'package:farmer/widgets/auto_translated_text.dart';
 
 class CropDetailsScreen extends StatefulWidget {
   final String cropName;
@@ -91,7 +92,7 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: Text(widget.cropName, style: GoogleFonts.poppins(color: Colors.black)),
+        title: AutoTranslatedText(widget.cropName, style: GoogleFonts.poppins(color: Colors.black)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -99,7 +100,7 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : cropData == null
-              ? const Center(child: Text('Crop details not found'))
+              ? const Center(child: AutoTranslatedText('Crop details not found'))
               : SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -131,14 +132,14 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                AutoTranslatedText(
                                   'Time to Grow',
                                   style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     color: Colors.black54,
                                   ),
                                 ),
-                                Text(
+                                AutoTranslatedText(
                                   cropData!['growth_time'],
                                   style: GoogleFonts.poppins(
                                     fontSize: 18,
@@ -155,7 +156,7 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
 
                       // Recommendation
                       if (bestDeal != null) ...[
-                        Text(
+                        AutoTranslatedText(
                           'Recommendation',
                           style: GoogleFonts.poppins(
                             fontSize: 18,
@@ -181,7 +182,7 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              AutoTranslatedText(
                                 'Best Place to $actionText',
                                 style: GoogleFonts.poppins(
                                   color: Colors.white70,
@@ -189,7 +190,7 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
                                 ),
                               ),
                               const SizedBox(height: 5),
-                              Text(
+                              AutoTranslatedText(
                                 bestDeal['market_name'],
                                 style: GoogleFonts.poppins(
                                   color: Colors.white,
@@ -201,7 +202,7 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
+                                  AutoTranslatedText(
                                     'Price: ₹${bestDeal['price']}/qt',
                                     style: GoogleFonts.poppins(
                                       color: Colors.white,
@@ -216,7 +217,7 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
                                         color: Colors.white.withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
-                                      child: Text(
+                                      child: AutoTranslatedText(
                                         'GOVT',
                                         style: GoogleFonts.poppins(
                                           color: Colors.white,
@@ -227,7 +228,7 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
                                 ],
                               ),
                               const SizedBox(height: 10),
-                              Text(
+                              AutoTranslatedText(
                                 _getRecommendationText(bestDeal),
                                 style: GoogleFonts.poppins(
                                   color: Colors.white.withOpacity(0.9),
@@ -241,7 +242,7 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
                       ],
 
                       // All Prices
-                      Text(
+                      AutoTranslatedText(
                         'Market Prices Comparison',
                         style: GoogleFonts.poppins(
                           fontSize: 18,
@@ -270,14 +271,14 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    AutoTranslatedText(
                                       market['market_name'],
                                       style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16,
                                       ),
                                     ),
-                                    Text(
+                                    AutoTranslatedText(
                                       market['type'].toString().toUpperCase(),
                                       style: GoogleFonts.poppins(
                                         fontSize: 12,
@@ -324,7 +325,7 @@ class _CropDetailsScreenState extends State<CropDetailsScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                               elevation: 5,
                             ),
-                            child: Text(
+                            child: AutoTranslatedText(
                               'Buy Now',
                               style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                             ),

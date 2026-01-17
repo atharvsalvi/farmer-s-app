@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:farmer/widgets/auto_translated_text.dart';
 
 class DiseaseDetectionScreen extends StatefulWidget {
   const DiseaseDetectionScreen({super.key});
@@ -78,7 +79,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
   void _showError(String message) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ).showSnackBar(SnackBar(content: AutoTranslatedText(message)));
   }
 
   @override
@@ -86,7 +87,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
+        title: AutoTranslatedText(
           'Crop Health Check',
           style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
         ),
@@ -117,7 +118,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                           color: Colors.grey,
                         ),
                         const SizedBox(height: 10),
-                        Text(
+                        AutoTranslatedText(
                           'Take or upload a photo of the leaf',
                           style: TextStyle(color: Colors.grey[600]),
                         ),
@@ -139,7 +140,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                   child: ElevatedButton.icon(
                     onPressed: () => _pickImage(ImageSource.camera),
                     icon: const Icon(Icons.camera_alt),
-                    label: const Text('Camera'),
+                    label: const AutoTranslatedText('Camera'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green.shade600,
                       foregroundColor: Colors.white,
@@ -152,7 +153,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () => _pickImage(ImageSource.gallery),
                     icon: const Icon(Icons.photo_library),
-                    label: const Text('Gallery'),
+                    label: const AutoTranslatedText('Gallery'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.green.shade700,
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -186,7 +187,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                             strokeWidth: 2,
                           ),
                         )
-                      : Text(
+                      : AutoTranslatedText(
                           'Analyze Crop Health',
                           style: GoogleFonts.outfit(
                             fontSize: 16,
@@ -222,7 +223,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: statusColor),
             ),
-            child: Text(
+            child: AutoTranslatedText(
               status.toUpperCase(),
               style: GoogleFonts.outfit(
                 color: statusColor,
@@ -233,17 +234,17 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
           ),
         ),
         const SizedBox(height: 20),
-        Text(
+        AutoTranslatedText(
           'Disease Name:',
           style: TextStyle(color: Colors.grey[600], fontSize: 14),
         ),
-        Text(
+        AutoTranslatedText(
           _result!['disease'] ?? 'Unknown',
           style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
         Center(
-          child: Text(
+          child: AutoTranslatedText(
             "Confidence: ${((_result!['confidence'] ?? 0) * 100).toStringAsFixed(1)}%",
             style: const TextStyle(color: Colors.grey),
           ),
@@ -255,7 +256,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
           const SizedBox(height: 20),
           _buildSection('Prevention', _result!['prevention']),
         ] else
-          const Text("Your crop looks healthy! Keep up the good work."),
+          const AutoTranslatedText("Your crop looks healthy! Keep up the good work."),
       ],
     );
   }
@@ -265,7 +266,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        AutoTranslatedText(
           title,
           style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w600),
         ),
@@ -277,7 +278,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text("• ", style: TextStyle(fontWeight: FontWeight.bold)),
-                Expanded(child: Text(item.toString())),
+                Expanded(child: AutoTranslatedText(item.toString())),
               ],
             ),
           ),

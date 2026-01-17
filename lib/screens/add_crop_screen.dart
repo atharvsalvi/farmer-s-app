@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:farmer/widgets/auto_translated_text.dart';
 
 class AddCropScreen extends StatefulWidget {
   final String currentTemperature;
@@ -22,7 +23,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
   final TextEditingController _sowingDateController = TextEditingController();
   
   String _selectedMoisture = 'Moist'; // Default
-  final List<String> _moistureOptions = ['Dry', 'Moist', 'Extremely Moist'];
+  // We'll update options dynamically in build
 
   @override
   void dispose() {
@@ -65,10 +66,17 @@ class _AddCropScreenState extends State<AddCropScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final List<String> moistureOptions = ['Dry', 'Moist', 'Wet'];
+    
+    // Ensure selected moisture is valid (reset if language changes)
+    if (!moistureOptions.contains(_selectedMoisture)) {
+       _selectedMoisture = moistureOptions[1]; // Default to Moist
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: Text('Add New Crop', style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: AutoTranslatedText('Add New Crop', style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -95,7 +103,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        AutoTranslatedText(
                           'Current Conditions',
                           style: GoogleFonts.poppins(fontSize: 12, color: Colors.blue[800]),
                         ),
@@ -111,7 +119,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
               const SizedBox(height: 25),
 
               // Crop Type
-              Text('Crop Type', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+              AutoTranslatedText('Crop Type', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _cropTypeController,
@@ -130,7 +138,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
               const SizedBox(height: 20),
 
               // Sowing Date
-              Text('Sowing Date', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+              AutoTranslatedText('Sowing Date', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _sowingDateController,
@@ -151,7 +159,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
               const SizedBox(height: 20),
 
               // Soil Moisture
-              Text('Soil Moisture', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+              AutoTranslatedText('Soil Moisture', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
@@ -160,9 +168,9 @@ class _AddCropScreenState extends State<AddCropScreen> {
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Column(
-                  children: _moistureOptions.map((option) {
+                  children: moistureOptions.map((option) {
                     return RadioListTile<String>(
-                      title: Text(option, style: GoogleFonts.poppins()),
+                      title: AutoTranslatedText(option, style: GoogleFonts.poppins()),
                       value: option,
                       groupValue: _selectedMoisture,
                       activeColor: Colors.green,
@@ -188,7 +196,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     elevation: 5,
                   ),
-                  child: Text(
+                  child: AutoTranslatedText(
                     'Add Crop',
                     style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
