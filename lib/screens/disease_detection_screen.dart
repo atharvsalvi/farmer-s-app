@@ -40,20 +40,26 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
       // Use localhost for Android Emulator (10.0.2.2) vs Web (localhost)
       // Note: On web, localhost refers to the machine running the browser.
       // Make sure your backend enables CORS.
-      final String baseUrl = kIsWeb ? 'http://localhost:3000' : 'http://10.0.2.2:3000';
+      final String baseUrl = kIsWeb
+          ? 'http://localhost:3000'
+          : 'http://10.0.2.2:3000';
       var uri = Uri.parse('$baseUrl/predict');
       var request = http.MultipartRequest('POST', uri);
-      
+
       if (kIsWeb) {
-        request.files.add(http.MultipartFile.fromBytes(
-          'image',
-          await _image!.readAsBytes(),
-          filename: _image!.name,
-        ));
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            await _image!.readAsBytes(),
+            filename: _image!.name,
+          ),
+        );
       } else {
-        request.files.add(await http.MultipartFile.fromPath('image', _image!.path));
+        request.files.add(
+          await http.MultipartFile.fromPath('image', _image!.path),
+        );
       }
-      
+
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);
 
@@ -74,7 +80,9 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -82,7 +90,10 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Crop Health Check', style: GoogleFonts.outfit(fontWeight: FontWeight.w600)),
+        title: Text(
+          'Crop Health Check',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+        ),
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -104,9 +115,16 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add_a_photo_outlined, size: 50, color: Colors.grey),
+                        Icon(
+                          Icons.add_a_photo_outlined,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(height: 10),
-                        Text('Take or upload a photo of the leaf', style: TextStyle(color: Colors.grey[600])),
+                        Text(
+                          'Take or upload a photo of the leaf',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
                       ],
                     )
                   : ClipRRect(
@@ -117,7 +135,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                     ),
             ),
             const SizedBox(height: 20),
-            
+
             // Action Buttons
             Row(
               children: [
@@ -159,14 +177,29 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                     backgroundColor: Colors.blue.shade700,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   child: _isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : Text('Analyze Crop Health', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          'Analyze Crop Health',
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
-            
+
             const SizedBox(height: 30),
 
             // Results Area
@@ -195,7 +228,11 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
             ),
             child: Text(
               status.toUpperCase(),
-              style: GoogleFonts.outfit(color: statusColor, fontWeight: FontWeight.bold, fontSize: 16),
+              style: GoogleFonts.outfit(
+                color: statusColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
             ),
           ),
         ),
@@ -209,15 +246,20 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
           style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
-        Center(child: Text("Confidence: ${((_result!['confidence'] ?? 0) * 100).toStringAsFixed(1)}%", style: const TextStyle(color: Colors.grey))),
+        Center(
+          child: Text(
+            "Confidence: ${((_result!['confidence'] ?? 0) * 100).toStringAsFixed(1)}%",
+            style: const TextStyle(color: Colors.grey),
+          ),
+        ),
         const Divider(height: 40),
-        
+
         if (!isHealthy) ...[
-            _buildSection('Possible Causes', _result!['causes']),
-            const SizedBox(height: 20),
-            _buildSection('Prevention', _result!['prevention']),
+          _buildSection('Possible Causes', _result!['causes']),
+          const SizedBox(height: 20),
+          _buildSection('Prevention', _result!['prevention']),
         ] else
-            const Text("Your crop looks healthy! Keep up the good work.")
+          const Text("Your crop looks healthy! Keep up the good work."),
       ],
     );
   }
@@ -227,18 +269,23 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w600)),
+        Text(
+          title,
+          style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 10),
-        ...items.map((item) => Padding(
-          padding: const EdgeInsets.only(bottom: 8, left: 10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("• ", style: TextStyle(fontWeight: FontWeight.bold)),
-              Expanded(child: Text(item.toString())),
-            ],
+        ...items.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 8, left: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("• ", style: TextStyle(fontWeight: FontWeight.bold)),
+                Expanded(child: Text(item.toString())),
+              ],
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
