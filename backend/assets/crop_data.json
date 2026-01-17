@@ -1,0 +1,112 @@
+[
+    {
+        "name": "Wheat",
+        "growth_time": "110-130 days",
+        "image": "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Rice",
+        "growth_time": "105-150 days",
+        "image": "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Corn (Maize)",
+        "growth_time": "60-100 days",
+        "image": "https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Barley",
+        "growth_time": "60-70 days",
+        "image": "https://images.unsplash.com/photo-1543253687-c931c8e01820?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Oats",
+        "growth_time": "60-70 days",
+        "image": "https://images.unsplash.com/photo-1516906571665-49af58989c56?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Sorghum",
+        "growth_time": "90-120 days",
+        "image": "https://images.unsplash.com/photo-1629814696096-7d25d52d4752?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Millet",
+        "growth_time": "60-90 days",
+        "image": "https://images.unsplash.com/photo-1667564969268-2334960c1e32?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Soybean",
+        "growth_time": "85-105 days",
+        "image": "https://images.unsplash.com/photo-1599940824399-b87987ce0799?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Cotton",
+        "growth_time": "150-180 days",
+        "image": "https://images.unsplash.com/photo-1605333396915-47ed6b68a00e?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Sugarcane",
+        "growth_time": "10-14 months",
+        "image": "https://images.unsplash.com/photo-1601625463687-25541fb72f62?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Potato",
+        "growth_time": "70-120 days",
+        "image": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Tomato",
+        "growth_time": "60-100 days",
+        "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Onion",
+        "growth_time": "100-175 days",
+        "image": "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Garlic",
+        "growth_time": "180-210 days",
+        "image": "https://images.unsplash.com/photo-1615485925694-a031e341f71d?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Ginger",
+        "growth_time": "8-10 months",
+        "image": "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Turmeric",
+        "growth_time": "7-9 months",
+        "image": "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Apple",
+        "growth_time": "4-5 years (Tree)",
+        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Banana",
+        "growth_time": "9-12 months",
+        "image": "https://images.unsplash.com/photo-1571771896612-618db6fd7a4e?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Mango",
+        "growth_time": "3-5 years (Tree)",
+        "image": "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Orange",
+        "growth_time": "3-4 years (Tree)",
+        "image": "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Grapes",
+        "growth_time": "3 years (Vine)",
+        "image": "https://images.unsplash.com/photo-1537640538966-79f369143f8f?auto=format&fit=crop&w=400"
+    },
+    {
+        "name": "Papaya",
+        "growth_time": "6-9 months",
+        "image": "https://images.unsplash.com/photo-1617112848923-cc5ac497a543?auto=format&fit=crop&w=400"
+    }
+]
