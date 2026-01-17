@@ -161,6 +161,16 @@ app.post('/api/officer/advisories', (req, res) => {
     res.json(newAdvisory);
 });
 
+app.delete('/api/officer/advisories/:id', (req, res) => {
+    const { id } = req.params;
+    const success = db.deleteAdvisory(id);
+    if (success) {
+        res.json({ success: true, message: "Advisory deleted" });
+    } else {
+        res.status(404).json({ error: "Advisory not found" });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Backend server running at http://localhost:${port}`);
 });

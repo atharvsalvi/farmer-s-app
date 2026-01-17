@@ -256,7 +256,9 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
           const SizedBox(height: 20),
           _buildSection('Prevention', _result!['prevention']),
         ] else
-          const AutoTranslatedText("Your crop looks healthy! Keep up the good work."),
+          const AutoTranslatedText(
+            "Your crop looks healthy! Keep up the good work.",
+          ),
       ],
     );
   }

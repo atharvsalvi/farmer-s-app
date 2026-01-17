@@ -63,6 +63,16 @@ const db = {
         return advisory;
     },
     getAdvisories: () => readJson(FILES.ADVISORIES),
+
+    deleteAdvisory: (id) => {
+        let advisories = readJson(FILES.ADVISORIES);
+        const filtered = advisories.filter(a => a.id !== id);
+        if (filtered.length !== advisories.length) {
+            writeJson(FILES.ADVISORIES, filtered);
+            return true;
+        }
+        return false;
+    },
 };
 
 module.exports = db;
