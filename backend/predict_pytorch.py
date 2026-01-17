@@ -44,20 +44,22 @@ class MyCNNModel(nn.Module):
 # ==========================================
 # 2. Prediction Setup
 # ==========================================
-MODEL_PATH = "Models/plant_disease_model_final.pth" # Updated to point to Models folder
-METADATA_PATH = "Models/disease_info.json" # Ensure you ran create_metadata.py
-DATASET_PATH = "Datasets/PlantDocBot_Dataset/train" # Needed to get class names
+MODEL_PATH = "Models/plant_disease_model_final.pth"
+METADATA_PATH = "Models/disease_info.json"
 
-def get_class_names(dataset_path):
+def get_class_names():
     """
-    Reads the folder names to reconstruct the class list.
+    Reads the class names from the metadata JSON file.
     Crucial: The order must be alphabetical to match PyTorch's ImageFolder.
     """
-    if not os.path.exists(dataset_path):
-        print(f"❌ Error: Could not find dataset at {dataset_path} to read class names.")
+    if not os.path.exists(METADATA_PATH):
+        print(f"❌ Error: Could not find metadata at {METADATA_PATH}")
         return []
     
-    classes = [d for d in os.listdir(dataset_path) if os.path.isdir(os.path.join(dataset_path, d))]
+    with open(METADATA_PATH, 'r') as f:
+        metadata = json.load(f)
+    
+    classes = list(metadata.keys())
     classes.sort() # PyTorch sorts classes alphabetically
     return classes
 
@@ -77,7 +79,7 @@ def load_trained_model(num_classes):
 
 def predict_image(image_path):
     # 1. Get Class Names
-    class_names = get_class_names(DATASET_PATH)
+    class_names = get_class_names()
     if not class_names:
         return
 
