@@ -84,12 +84,10 @@ class _LoginScreenState extends State<LoginScreen> {
       _generatedOtp = otp;
     });
 
-    // 3. Send OTP via Local Backend
+    // 3. Send OTP via Backend
     try {
-      // Use localhost:3000 (Node.js server)
-      // Note: For Android Emulator, use 'http://10.0.2.2:3000/send-otp'
-      // For Web/iOS Simulator, use 'http://localhost:3000/send-otp'
-      final url = Uri.parse('http://localhost:3000/send-otp');
+      // Use Deployed Backend
+      final url = Uri.parse('https://farmer-backend-5rka.onrender.com/send-otp');
       
       final response = await http.post(
         url,
