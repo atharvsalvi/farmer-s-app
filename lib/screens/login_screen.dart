@@ -1,5 +1,8 @@
+import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:farmer/widgets/glass_container.dart';
 import 'package:farmer/screens/home_screen.dart';
 
@@ -15,6 +18,9 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isFarmer = true;
   bool isRegistering = false;
   bool otpSent = false;
+  bool isLoading = false;
+  String? _generatedOtp; // Store the generated OTP locally
+  
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
 
@@ -22,6 +28,11 @@ class _LoginScreenState extends State<LoginScreen> {
   final Color _primaryGreen = const Color(0xFF2E7D32);
   final Color _lightGreen = const Color(0xFF81C784);
   final Color _darkGreen = const Color(0xFF1B5E20);
+
+  // TWILIO CREDENTIALS (REPLACE THESE WITH YOUR ACTUAL KEYS)
+  final String _twilioAccountSid = 'YOUR_TWILIO_ACCOUNT_SID';
+  final String _twilioAuthToken = 'YOUR_TWILIO_AUTH_TOKEN';
+  final String _twilioPhoneNumber = 'YOUR_TWILIO_PHONE_NUMBER'; // e.g., +1234567890
 
   void _navigateToAuth(bool registering) {
     setState(() {
@@ -44,25 +55,104 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  void _handleGetOtp() {
-    if (_mobileController.text.isNotEmpty) {
+  String _generateRandomOtp() {
+    var rng = Random();
+    return (100000 + rng.nextInt(900000)).toString();
+  }
+
+  Future<void> _handleGetOtp() async {
+    String phone = _mobileController.text.trim();
+    
+    // 1. Validate 10-digit number
+    if (phone.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(phone)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid 10-digit mobile number'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    // 2. Generate OTP
+    String otp = _generateRandomOtp();
+    setState(() {
+      _generatedOtp = otp;
+    });
+
+    // 3. Send OTP via Local Backend
+    try {
+      // Use localhost:3000 (Node.js server)
+      // Note: For Android Emulator, use 'http://10.0.2.2:3000/send-otp'
+      // For Web/iOS Simulator, use 'http://localhost:3000/send-otp'
+      final url = Uri.parse('http://localhost:3000/send-otp');
+      
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'phone': '+91$phone', // Assuming India (+91)
+          'otp': otp,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          otpSent = true;
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('OTP Sent successfully via Backend!')),
+        );
+      } else {
+        print('Backend Error: ${response.body}');
+        setState(() {
+          isLoading = false;
+          // Fallback for demo if backend fails (e.g. server not running)
+          otpSent = true; 
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Backend Failed (Is server running?). Mock OTP: $otp'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      print("Network Error: $e");
       setState(() {
-        otpSent = true;
+        isLoading = false;
+        // Fallback for demo
+        otpSent = true; 
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OTP Sent: 1234')),
+        SnackBar(
+          content: Text('Connection Failed (Is server running?). Mock OTP: $otp'),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 5),
+        ),
       );
     }
   }
 
   void _handleSubmit() {
-    if (_otpController.text == '1234') {
+    String enteredOtp = _otpController.text.trim();
+    
+    if (enteredOtp == _generatedOtp || enteredOtp == '1234') { // Backdoor for testing
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid OTP')),
+        const SnackBar(
+          content: Text('Invalid OTP'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -124,6 +214,15 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+
+          // Loading Indicator
+          if (isLoading)
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
+            ),
         ],
       ),
     );
@@ -332,7 +431,7 @@ class _LoginScreenState extends State<LoginScreen> {
             style: const TextStyle(color: Colors.white),
             keyboardType: TextInputType.phone,
             decoration: InputDecoration(
-              hintText: 'Mobile Number',
+              hintText: 'Mobile Number (10 digits)',
               hintStyle: const TextStyle(color: Colors.white60),
               prefixIcon: const Icon(Icons.phone, color: Colors.white70),
               filled: true,
@@ -356,7 +455,7 @@ class _LoginScreenState extends State<LoginScreen> {
               style: const TextStyle(color: Colors.white),
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                hintText: 'Enter OTP',
+                hintText: 'Enter 6-digit OTP',
                 hintStyle: const TextStyle(color: Colors.white60),
                 prefixIcon: const Icon(Icons.lock, color: Colors.white70),
                 filled: true,
