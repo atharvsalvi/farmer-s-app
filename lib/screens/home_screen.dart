@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:farmer/widgets/glass_container.dart';
 import 'package:farmer/screens/market_screen.dart';
+import 'package:farmer/screens/disease_detection_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -215,6 +216,72 @@ class _HomeScreenState extends State<HomeScreen> {
                   _buildCropCard('Rice', 'Harvested: Dec 2023', 'Yield: 40qt', Colors.green),
                   _buildCropCard('Cotton', 'Harvested: Nov 2023', 'Yield: 20qt', Colors.blueGrey),
                 ],
+              ),
+            ),
+            const SizedBox(height: 25),
+
+            // Crop Health Check
+            _buildSectionHeader('Crop Health'),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DiseaseDetectionScreen()),
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF512F), Color(0xFFDD2476)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.red.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.health_and_safety, color: Colors.white, size: 30),
+                    ),
+                    const SizedBox(width: 20),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Check Crop Health',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Detect Diseases & Gets Cures',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.arrow_forward_ios, color: Colors.white),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 25),
