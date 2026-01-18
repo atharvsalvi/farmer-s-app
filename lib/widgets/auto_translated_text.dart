@@ -10,6 +10,7 @@ class AutoTranslatedText extends StatefulWidget {
   final TextAlign? textAlign;
   final int? maxLines;
   final TextOverflow? overflow;
+  final bool parseBold;
 
   const AutoTranslatedText(
     this.text, {
@@ -18,6 +19,7 @@ class AutoTranslatedText extends StatefulWidget {
     this.textAlign,
     this.maxLines,
     this.overflow,
+    this.parseBold = false,
   });
 
   @override
@@ -47,8 +49,10 @@ class _AutoTranslatedTextState extends State<AutoTranslatedText> {
     final targetLang = languageProvider.locale.languageCode;
 
     // Avoid re-translating if language hasn't changed and we have a result
-    if (_currentLanguageCode == targetLang && _translatedText != null && widget.text == _translatedText) {
-       return;
+    if (_currentLanguageCode == targetLang &&
+        _translatedText != null &&
+        widget.text == _translatedText) {
+      return;
     }
 
     if (targetLang == 'en') {
@@ -74,12 +78,44 @@ class _AutoTranslatedTextState extends State<AutoTranslatedText> {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      _translatedText ?? widget.text,
-      style: widget.style,
-      textAlign: widget.textAlign,
+    final textToDisplay = _translatedText ?? widget.text;
+
+    if (!widget.parseBold) {
+      return Text(
+        textToDisplay,
+        style: widget.style,
+        textAlign: widget.textAlign,
+        maxLines: widget.maxLines,
+        overflow: widget.overflow,
+      );
+    }
+
+    // Parse bold text
+    List<TextSpan> spans = [];
+    final parts = textToDisplay.split('**');
+
+    for (int i = 0; i < parts.length; i++) {
+      if (i % 2 == 1) {
+        // Odd index = Bold
+        spans.add(
+          TextSpan(
+            text: parts[i],
+            style: (widget.style ?? const TextStyle()).copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      } else {
+        // Even index = Normal
+        spans.add(TextSpan(text: parts[i], style: widget.style));
+      }
+    }
+
+    return RichText(
+      text: TextSpan(children: spans, style: widget.style),
+      textAlign: widget.textAlign ?? TextAlign.start,
       maxLines: widget.maxLines,
-      overflow: widget.overflow,
+      overflow: widget.overflow ?? TextOverflow.clip,
     );
   }
 }

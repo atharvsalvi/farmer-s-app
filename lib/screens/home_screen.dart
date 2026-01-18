@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
-import 'package:farmer/widgets/glass_container.dart';
+
 import 'package:farmer/screens/market_screen.dart';
 import 'package:farmer/screens/purchase_history_screen.dart';
 import 'package:farmer/screens/add_crop_screen.dart';
@@ -14,6 +14,7 @@ import 'package:farmer/providers/language_provider.dart';
 import 'package:farmer/widgets/auto_translated_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:farmer/screens/login_screen.dart';
+import 'package:farmer/screens/ai_suggestions_screen.dart';
 
 import 'package:farmer/services/api_constants.dart';
 
@@ -753,6 +754,78 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         AutoTranslatedText(
                           'Buy & Sell Crops',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.arrow_forward_ios, color: Colors.white),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+
+            // AI Suggestions
+            _buildSectionHeader('AI Suggestions'),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AISuggestionsScreen(),
+                  ),
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.purple.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.psychology,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoTranslatedText(
+                          'Smart Assistant',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        AutoTranslatedText(
+                          'Get AI-powered farming advice',
                           style: GoogleFonts.poppins(
                             color: Colors.white.withOpacity(0.9),
                             fontSize: 14,
