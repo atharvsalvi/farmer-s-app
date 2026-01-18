@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:farmer/widgets/auto_translated_text.dart';
 
+import 'package:farmer/services/api_constants.dart';
+
 class PurchaseHistoryScreen extends StatefulWidget {
   final String? phone;
   const PurchaseHistoryScreen({super.key, this.phone});
@@ -31,7 +33,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
 
     try {
       // Use Deployed Backend
-      final String baseUrl = 'http://localhost:3000';
+      final String baseUrl = ApiConstants.baseUrl;
       final response = await http.get(
         Uri.parse('$baseUrl/api/user/${widget.phone}'),
       );

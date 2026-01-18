@@ -9,6 +9,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
+import 'package:farmer/services/api_constants.dart';
+
 class OfficerDashboardScreen extends StatefulWidget {
   const OfficerDashboardScreen({super.key});
 
@@ -69,8 +71,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
   }
 
   String get _baseUrl {
-    // Use Deployed Backend
-    return 'http://localhost:3000';
+    return ApiConstants.baseUrl;
   }
 
   Future<void> _logout() async {

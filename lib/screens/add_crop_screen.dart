@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:farmer/widgets/auto_translated_text.dart';
 
+import 'package:farmer/services/api_constants.dart';
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -69,7 +71,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
 
       if (widget.phone != null) {
         try {
-          final String baseUrl = 'http://localhost:3000';
+          final String baseUrl = ApiConstants.baseUrl;
           final response = await http.post(
             Uri.parse('$baseUrl/api/user/${widget.phone}/crops'),
             headers: {'Content-Type': 'application/json'},

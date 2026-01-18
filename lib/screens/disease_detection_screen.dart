@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:farmer/widgets/auto_translated_text.dart';
 
+import 'package:farmer/services/api_constants.dart';
+
 class DiseaseDetectionScreen extends StatefulWidget {
   final String? phone;
   final int? cropIndex;
@@ -41,7 +43,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
 
     try {
       // Use Deployed Backend
-      final String baseUrl = 'http://localhost:3000';
+      final String baseUrl = ApiConstants.baseUrl;
       var uri = Uri.parse('$baseUrl/predict');
       var request = http.MultipartRequest('POST', uri);
 

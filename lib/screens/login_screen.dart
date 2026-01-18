@@ -13,6 +13,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:farmer/services/api_constants.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -87,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // 2. Check User Existence & Role
     try {
-      final String baseUrl = 'http://localhost:3000';
+      final String baseUrl = ApiConstants.baseUrl;
       final userResponse = await http.get(
         Uri.parse('$baseUrl/api/user/$phone'),
       );
@@ -260,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // 2. Call Register API
-      final String baseUrl = 'http://localhost:3000';
+      final String baseUrl = ApiConstants.baseUrl;
       final response = await http.post(
         Uri.parse('$baseUrl/api/register'),
         headers: {'Content-Type': 'application/json'},

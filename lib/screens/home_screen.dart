@@ -15,6 +15,8 @@ import 'package:farmer/widgets/auto_translated_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:farmer/screens/login_screen.dart';
 
+import 'package:farmer/services/api_constants.dart';
+
 class HomeScreen extends StatefulWidget {
   final String? phone;
   const HomeScreen({super.key, this.phone});
@@ -85,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchUserData() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/api/user/${widget.phone}'),
+        Uri.parse('${ApiConstants.baseUrl}/api/user/${widget.phone}'),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -212,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchAdvisories() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/api/advisories'),
+        Uri.parse('${ApiConstants.baseUrl}/api/advisories'),
       );
       if (response.statusCode == 200) {
         final List<dynamic> allAdvisories = jsonDecode(response.body);
