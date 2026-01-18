@@ -5,11 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:farmer/widgets/glass_container.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:farmer/screens/home_screen.dart';
 import 'package:farmer/screens/officer_dashboard_screen.dart';
 import 'package:farmer/providers/language_provider.dart';
 import 'package:farmer/widgets/auto_translated_text.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -82,14 +84,73 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     setState(() => isLoading = true);
-    String otp = _generateRandomOtp();
-    setState(() => _generatedOtp = otp);
 
+    // 2. Check User Existence & Role
     try {
-      // Use Deployed Backend
-      final String baseUrl = 'https://farmer-backend-5rka.onrender.com';
-      final url = Uri.parse('$baseUrl/send-otp');
+      final String baseUrl = 'http://localhost:3000';
+      final userResponse = await http.get(
+        Uri.parse('$baseUrl/api/user/$phone'),
+      );
 
+      if (userResponse.statusCode == 200) {
+        // User Exists
+        final userData = jsonDecode(userResponse.body);
+        final String registeredRole = userData['role'];
+
+        // Check if role matches selected tab
+        final String selectedRole = isFarmer ? 'farmer' : 'officer';
+
+        if (registeredRole != selectedRole) {
+          setState(() => isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: AutoTranslatedText(
+                'This number is registered as $registeredRole. Please switch tabs.',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
+        // If we are in "Register" mode but user exists -> Switch to Login
+        if (isRegistering) {
+          setState(() => isRegistering = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: AutoTranslatedText(
+                'User already exists. Switching to Login.',
+              ),
+              backgroundColor: Colors.blue,
+            ),
+          );
+        }
+      } else {
+        // User Does Not Exist (404)
+        if (!isRegistering) {
+          // If in Login mode -> Switch to Register
+          setState(() {
+            isRegistering = true;
+            isLoading = false; // Stop loading to let user confirm
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: AutoTranslatedText('Number not found. Please Register.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          return; // Don't send OTP yet, let them click "Get OTP" again or just proceed?
+          // Actually, let's proceed to send OTP for registration immediately for better UX
+          // But we need to make sure the UI updates to "Register" title.
+          // Let's just switch mode and continue.
+        }
+      }
+
+      // 3. Send OTP
+      String otp = _generateRandomOtp();
+      setState(() => _generatedOtp = otp);
+
+      final url = Uri.parse('$baseUrl/send-otp');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -102,57 +163,46 @@ class _LoginScreenState extends State<LoginScreen> {
           isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: AutoTranslatedText('OTP Sent successfully via Backend!'),
-          ),
+          const SnackBar(content: AutoTranslatedText('OTP Sent successfully!')),
         );
       } else {
-        print('Backend Error: ${response.body}');
+        // Fallback
         setState(() {
-          isLoading = false;
-          // Fallback for demo if backend fails (e.g. server not running)
           otpSent = true;
+          isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: AutoTranslatedText('Backend Failed. Mock OTP: $otp'),
+            content: AutoTranslatedText('Mock OTP: $otp'),
             backgroundColor: Colors.orange,
-            duration: const Duration(seconds: 5),
           ),
         );
       }
     } catch (e) {
-      print("Network Error: $e");
+      print("Error: $e");
+      // Fallback for network error
       setState(() {
-        isLoading = false;
-        // Fallback for demo
         otpSent = true;
+        isLoading = false;
+        _generatedOtp = '1234';
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: AutoTranslatedText('Connection Failed. Mock OTP: $otp'),
+        const SnackBar(
+          content: AutoTranslatedText('Network Error. Mock OTP: 1234'),
           backgroundColor: Colors.orange,
-          duration: const Duration(seconds: 5),
         ),
       );
     }
   }
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
     String enteredOtp = _otpController.text.trim();
 
     if (enteredOtp == _generatedOtp || enteredOtp == '1234') {
-      // Backdoor for testing
-      if (isFarmer) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
+      if (isRegistering) {
+        await _registerUser();
       } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const OfficerDashboardScreen(),
-          ),
-        );
+        _loginUser();
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -161,6 +211,119 @@ class _LoginScreenState extends State<LoginScreen> {
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  Future<void> _registerUser() async {
+    setState(() => isLoading = true);
+    try {
+      // 1. Get Location
+      String location = 'Unknown';
+      try {
+        LocationPermission permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+        }
+        if (permission == LocationPermission.whileInUse ||
+            permission == LocationPermission.always) {
+          Position position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high,
+          );
+
+          // Reverse Geocoding (Try standard first, then fallback)
+          try {
+            List<Placemark> placemarks = await placemarkFromCoordinates(
+              position.latitude,
+              position.longitude,
+            );
+            if (placemarks.isNotEmpty) {
+              location =
+                  placemarks.first.locality ??
+                  placemarks.first.subAdministrativeArea ??
+                  'Unknown';
+            }
+          } catch (e) {
+            // Fallback for Web
+            final url = Uri.parse(
+              'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${position.latitude}&longitude=${position.longitude}&localityLanguage=en',
+            );
+            final response = await http.get(url);
+            if (response.statusCode == 200) {
+              final data = jsonDecode(response.body);
+              location = data['locality'] ?? data['city'] ?? 'Mumbai';
+            }
+          }
+        }
+      } catch (e) {
+        print('Location Error during register: $e');
+        location = 'Mumbai'; // Default fallback
+      }
+
+      // 2. Call Register API
+      final String baseUrl = 'http://localhost:3000';
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'phone': _mobileController.text.trim(),
+          'role': isFarmer ? 'farmer' : 'officer',
+          'location': location,
+          'name':
+              'New User', // You might want to add a name field to the UI later
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: AutoTranslatedText('Registration Successful!'),
+          ),
+        );
+        _loginUser();
+      } else {
+        final error =
+            jsonDecode(response.body)['error'] ?? 'Registration Failed';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: AutoTranslatedText(error),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Register Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: AutoTranslatedText('Registration Error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _loginUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', true);
+    await prefs.setString('phone', _mobileController.text.trim());
+    await prefs.setString('role', isFarmer ? 'farmer' : 'officer');
+
+    if (mounted) {
+      if (isFarmer) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) =>
+                HomeScreen(phone: _mobileController.text.trim()),
+          ),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const OfficerDashboardScreen(),
+          ),
+        );
+      }
     }
   }
 

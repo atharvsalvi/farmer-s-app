@@ -3,14 +3,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:farmer/widgets/auto_translated_text.dart';
 
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 class AddCropScreen extends StatefulWidget {
   final String currentTemperature;
   final String currentWeather;
+  final String? phone;
 
   const AddCropScreen({
     super.key,
     required this.currentTemperature,
     required this.currentWeather,
+    this.phone,
   });
 
   @override
@@ -21,7 +26,8 @@ class _AddCropScreenState extends State<AddCropScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _cropTypeController = TextEditingController();
   final TextEditingController _sowingDateController = TextEditingController();
-  
+  bool _isSaving = false;
+
   String _selectedMoisture = 'Moist'; // Default
   // We'll update options dynamically in build
 
@@ -46,8 +52,10 @@ class _AddCropScreenState extends State<AddCropScreen> {
     }
   }
 
-  void _saveCrop() {
+  Future<void> _saveCrop() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _isSaving = true);
+
       // Create crop object
       final newCrop = {
         'name': _cropTypeController.text,
@@ -56,27 +64,65 @@ class _AddCropScreenState extends State<AddCropScreen> {
         'temperature': widget.currentTemperature,
         'weather': widget.currentWeather,
         'stage': 'Seedling', // Default stage
-        'color': Colors.green, // Default color
+        'color': 'green', // Default color string for DB
       };
 
-      // Return the new crop to the previous screen
-      Navigator.pop(context, newCrop);
+      if (widget.phone != null) {
+        try {
+          final String baseUrl = 'http://localhost:3000';
+          final response = await http.post(
+            Uri.parse('$baseUrl/api/user/${widget.phone}/crops'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(newCrop),
+          );
+
+          if (response.statusCode == 200) {
+            // Return the new crop to update UI immediately if needed
+            if (mounted) Navigator.pop(context, newCrop);
+          } else {
+            _showError('Failed to save crop');
+          }
+        } catch (e) {
+          print('Error saving crop: $e');
+          _showError('Network error');
+        } finally {
+          if (mounted) setState(() => _isSaving = false);
+        }
+      } else {
+        // Fallback for no phone (local only)
+        Navigator.pop(context, newCrop);
+      }
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: AutoTranslatedText(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final List<String> moistureOptions = ['Dry', 'Moist', 'Wet'];
-    
+
     // Ensure selected moisture is valid (reset if language changes)
     if (!moistureOptions.contains(_selectedMoisture)) {
-       _selectedMoisture = moistureOptions[1]; // Default to Moist
+      _selectedMoisture = moistureOptions[1]; // Default to Moist
     }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: AutoTranslatedText('Add New Crop', style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: AutoTranslatedText(
+          'Add New Crop',
+          style: GoogleFonts.poppins(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -105,11 +151,18 @@ class _AddCropScreenState extends State<AddCropScreen> {
                       children: [
                         AutoTranslatedText(
                           'Current Conditions',
-                          style: GoogleFonts.poppins(fontSize: 12, color: Colors.blue[800]),
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.blue[800],
+                          ),
                         ),
                         Text(
                           '${widget.currentTemperature} • ${widget.currentWeather}',
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue[900]),
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.blue[900],
+                          ),
                         ),
                       ],
                     ),
@@ -119,7 +172,13 @@ class _AddCropScreenState extends State<AddCropScreen> {
               const SizedBox(height: 25),
 
               // Crop Type
-              AutoTranslatedText('Crop Type', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+              AutoTranslatedText(
+                'Crop Type',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _cropTypeController,
@@ -133,12 +192,19 @@ class _AddCropScreenState extends State<AddCropScreen> {
                   ),
                   prefixIcon: const Icon(Icons.grass),
                 ),
-                validator: (value) => value!.isEmpty ? 'Please enter crop type' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter crop type' : null,
               ),
               const SizedBox(height: 20),
 
               // Sowing Date
-              AutoTranslatedText('Sowing Date', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+              AutoTranslatedText(
+                'Sowing Date',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _sowingDateController,
@@ -154,15 +220,25 @@ class _AddCropScreenState extends State<AddCropScreen> {
                   ),
                   prefixIcon: const Icon(Icons.calendar_today),
                 ),
-                validator: (value) => value!.isEmpty ? 'Please select sowing date' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Please select sowing date' : null,
               ),
               const SizedBox(height: 20),
 
               // Soil Moisture
-              AutoTranslatedText('Soil Moisture', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+              AutoTranslatedText(
+                'Soil Moisture',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
               const SizedBox(height: 10),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 15,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
@@ -170,7 +246,10 @@ class _AddCropScreenState extends State<AddCropScreen> {
                 child: Column(
                   children: moistureOptions.map((option) {
                     return RadioListTile<String>(
-                      title: AutoTranslatedText(option, style: GoogleFonts.poppins()),
+                      title: AutoTranslatedText(
+                        option,
+                        style: GoogleFonts.poppins(),
+                      ),
                       value: option,
                       groupValue: _selectedMoisture,
                       activeColor: Colors.green,
@@ -190,16 +269,24 @@ class _AddCropScreenState extends State<AddCropScreen> {
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: _saveCrop,
+                  onPressed: _isSaving ? null : _saveCrop,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                     elevation: 5,
                   ),
-                  child: AutoTranslatedText(
-                    'Add Crop',
-                    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
+                  child: _isSaving
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : AutoTranslatedText(
+                          'Add Crop',
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ],

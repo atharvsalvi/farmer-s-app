@@ -8,7 +8,9 @@ import 'package:http/http.dart' as http;
 import 'package:farmer/widgets/auto_translated_text.dart';
 
 class DiseaseDetectionScreen extends StatefulWidget {
-  const DiseaseDetectionScreen({super.key});
+  final String? phone;
+  final int? cropIndex;
+  const DiseaseDetectionScreen({super.key, this.phone, this.cropIndex});
 
   @override
   State<DiseaseDetectionScreen> createState() => _DiseaseDetectionScreenState();
@@ -39,9 +41,17 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
 
     try {
       // Use Deployed Backend
-      final String baseUrl = 'https://farmer-backend-5rka.onrender.com';
+      final String baseUrl = 'http://localhost:3000';
       var uri = Uri.parse('$baseUrl/predict');
       var request = http.MultipartRequest('POST', uri);
+
+      // Add context fields
+      if (widget.phone != null) {
+        request.fields['phone'] = widget.phone!;
+      }
+      if (widget.cropIndex != null) {
+        request.fields['cropIndex'] = widget.cropIndex.toString();
+      }
 
       if (kIsWeb) {
         request.files.add(

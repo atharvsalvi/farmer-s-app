@@ -1,0 +1,114 @@
+[
+  {
+    "id": "officer_001",
+    "name": "Suresh Patil",
+    "phone": "9876543211",
+    "role": "officer",
+    "region": "Mumbai",
+    "designation": "Senior Agricultural Officer"
+  },
+  {
+    "id": "farmer_001",
+    "name": "Ramesh Gaikwad",
+    "phone": "9876543212",
+    "role": "farmer",
+    "location": "Mumbai",
+    "landSize": "5 Acres",
+    "crops": [
+      {
+        "name": "Wheat",
+        "sowingDate": "2024-01-10",
+        "moisture": "Moist",
+        "temperature": "24°C",
+        "weather": "Sunny",
+        "stage": "Germination",
+        "color": "orange",
+        "health": "Healthy"
+      },
+      {
+        "name": "Onion",
+        "sowingDate": "2024-01-15",
+        "moisture": "Dry",
+        "temperature": "26°C",
+        "weather": "Clear",
+        "stage": "Seedling",
+        "color": "yellow",
+        "health": "Healthy"
+      },
+      {
+        "name": "Maize",
+        "sowingDate": "2026-01-19",
+        "moisture": "Moist",
+        "temperature": "28°C",
+        "weather": "Sunny",
+        "stage": "Seedling",
+        "color": "green",
+        "health": "Healthy"
+      },
+      {
+        "name": "Tomato",
+        "sowingDate": "2026-01-18",
+        "moisture": "Moist",
+        "temperature": "28°C",
+        "weather": "Sunny",
+        "stage": "Seedling",
+        "color": "green",
+        "health": "Infected",
+        "diseaseName": "Apple___Cedar_apple_rust",
+        "preventiveMeasures": "Consult an expert.",
+        "reason": "Fungal infection likely.",
+        "imageUrl": "1768696523547-WhatsApp Image 2026-01-17 at 20.44.24 (1).jpeg"
+      }
+    ],
+    "previousCrops": [
+      {
+        "name": "Rice",
+        "harvestDate": "Dec 2023",
+        "yield": "40qt",
+        "color": "green"
+      },
+      {
+        "name": "Cotton",
+        "harvestDate": "Nov 2023",
+        "yield": "20qt",
+        "color": "blueGrey"
+      }
+    ],
+    "purchaseHistory": [
+      {
+        "cropName": "Wheat Seeds",
+        "quantity": "5",
+        "marketName": "Pune APMC",
+        "totalPrice": "12000",
+        "date": "2024-01-10T10:00:00.000"
+      },
+      {
+        "cropName": "Fertilizer A",
+        "quantity": "10",
+        "marketName": "Nashik Market",
+        "totalPrice": "5000",
+        "date": "2023-12-15T14:30:00.000"
+      }
+    ]
+  },
+  {
+    "id": "1768690951350",
+    "name": "New User",
+    "phone": "9876543218",
+    "role": "farmer",
+    "location": "Mumbai",
+    "joinedAt": "2026-01-17T23:02:31.350Z",
+    "crops": [
+      {
+        "name": "Tomato",
+        "sowingDate": "2026-01-17",
+        "moisture": "Moist",
+        "temperature": "28°C",
+        "weather": "Sunny",
+        "stage": "Seedling",
+        "color": "green",
+        "health": "Healthy"
+      }
+    ]
+  }
+]

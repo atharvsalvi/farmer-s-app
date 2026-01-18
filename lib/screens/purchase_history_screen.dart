@@ -1,19 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:farmer/widgets/auto_translated_text.dart';
 
 class PurchaseHistoryScreen extends StatefulWidget {
-  const PurchaseHistoryScreen({super.key});
+  final String? phone;
+  const PurchaseHistoryScreen({super.key, this.phone});
 
   @override
   State<PurchaseHistoryScreen> createState() => _PurchaseHistoryScreenState();
 }
 
 class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
-  List<Map<String, dynamic>> _history = [];
+  List<dynamic> _history = [];
   bool _isLoading = true;
 
   @override
@@ -23,17 +24,33 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
   }
 
   Future<void> _loadHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> historyList = prefs.getStringList('purchase_history') ?? [];
-    
-    setState(() {
-      _history = historyList
-          .map((item) => jsonDecode(item) as Map<String, dynamic>)
-          .toList()
-          .reversed // Show newest first
-          .toList();
-      _isLoading = false;
-    });
+    if (widget.phone == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    try {
+      // Use Deployed Backend
+      final String baseUrl = 'http://localhost:3000';
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/user/${widget.phone}'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            _history = data['purchaseHistory'] ?? [];
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      print('Error fetching purchase history: $e');
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -43,100 +60,121 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
       appBar: AppBar(
         title: AutoTranslatedText(
           'Purchase History',
-          style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.black),
+            onPressed: () {
+              setState(() => _isLoading = true);
+              _loadHistory();
+            },
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _history.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.history, size: 80, color: Colors.grey[300]),
-                      const SizedBox(height: 20),
-                      AutoTranslatedText(
-                        'No purchases yet',
-                        style: GoogleFonts.poppins(color: Colors.grey, fontSize: 16),
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.history, size: 80, color: Colors.grey[300]),
+                  const SizedBox(height: 20),
+                  AutoTranslatedText(
+                    'No purchases yet',
+                    style: GoogleFonts.poppins(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _history.length,
+              itemBuilder: (context, index) {
+                final item = _history[index];
+                final date = DateTime.parse(item['date']);
+                final formattedDate = DateFormat(
+                  'MMM d, yyyy • h:mm a',
+                ).format(date);
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 15),
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 5,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _history.length,
-                  itemBuilder: (context, index) {
-                    final item = _history[index];
-                    final date = DateTime.parse(item['date']);
-                    final formattedDate = DateFormat('MMM d, yyyy • h:mm a').format(date);
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 15),
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
-                            blurRadius: 5,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              AutoTranslatedText(
-                                item['cropName'],
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              Text(
-                                '₹${item['totalPrice']}',
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
                           AutoTranslatedText(
-                            '${item['quantity']} Quintals from ${item['marketName']}',
+                            item['cropName'],
                             style: GoogleFonts.poppins(
-                              color: Colors.black87,
-                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
                             ),
                           ),
-                          const Divider(height: 20),
-                          Row(
-                            children: [
-                              const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
-                              const SizedBox(width: 5),
-                              Text(
-                                formattedDate,
-                                style: GoogleFonts.poppins(
-                                  color: Colors.grey,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            '₹${item['totalPrice']}',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.green,
+                            ),
                           ),
                         ],
                       ),
-                    );
-                  },
-                ),
+                      const SizedBox(height: 5),
+                      AutoTranslatedText(
+                        '${item['quantity']} Quintals from ${item['marketName']}',
+                        style: GoogleFonts.poppins(
+                          color: Colors.black87,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const Divider(height: 20),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today,
+                            size: 14,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            formattedDate,
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
 }
