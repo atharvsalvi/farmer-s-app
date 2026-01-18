@@ -37,8 +37,9 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
     // Save Purchase to History
     try {
       final prefs = await SharedPreferences.getInstance();
-      final List<String> history = prefs.getStringList('purchase_history') ?? [];
-      
+      final List<String> history =
+          prefs.getStringList('purchase_history') ?? [];
+
       final purchaseData = {
         'cropName': widget.cropName,
         'marketName': widget.marketName,
@@ -46,7 +47,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
         'totalPrice': _totalPrice,
         'date': DateTime.now().toIso8601String(),
       };
-      
+
       history.add(jsonEncode(purchaseData));
       await prefs.setStringList('purchase_history', history);
     } catch (e) {
@@ -62,12 +63,17 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Column(
             children: [
               const Icon(Icons.check_circle, color: Colors.green, size: 60),
               const SizedBox(height: 10),
-              AutoTranslatedText('Purchase Successful!', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+              AutoTranslatedText(
+                'Purchase Successful!',
+                style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           content: AutoTranslatedText(
@@ -82,7 +88,13 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                 Navigator.of(context).pop(); // Close Purchase Screen
                 Navigator.of(context).pop(); // Close Details Screen
               },
-              child: AutoTranslatedText('Done', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.green)),
+              child: AutoTranslatedText(
+                'Done',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
             ),
           ],
         ),
@@ -95,7 +107,10 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: AutoTranslatedText('Confirm Purchase', style: GoogleFonts.poppins(color: Colors.black)),
+        title: AutoTranslatedText(
+          'Confirm Purchase',
+          style: GoogleFonts.poppins(color: Colors.black),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -124,24 +139,45 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      AutoTranslatedText('Crop', style: GoogleFonts.poppins(color: Colors.grey)),
-                      AutoTranslatedText(widget.cropName, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+                      AutoTranslatedText(
+                        'Crop',
+                        style: GoogleFonts.poppins(color: Colors.grey),
+                      ),
+                      AutoTranslatedText(
+                        widget.cropName,
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ],
                   ),
                   const Divider(height: 30),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      AutoTranslatedText('Market', style: GoogleFonts.poppins(color: Colors.grey)),
-                      AutoTranslatedText(widget.marketName, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                      AutoTranslatedText(
+                        'Market',
+                        style: GoogleFonts.poppins(color: Colors.grey),
+                      ),
+                      AutoTranslatedText(
+                        widget.marketName,
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      AutoTranslatedText('Price per Qt', style: GoogleFonts.poppins(color: Colors.grey)),
-                      Text('₹${widget.pricePerQt}', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                      AutoTranslatedText(
+                        'Price per Qt',
+                        style: GoogleFonts.poppins(color: Colors.grey),
+                      ),
+                      Text(
+                        '₹${widget.pricePerQt}',
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                      ),
                     ],
                   ),
                 ],
@@ -150,7 +186,13 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
             const SizedBox(height: 30),
 
             // Quantity Selector
-            AutoTranslatedText('Select Quantity (Quintals)', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+            AutoTranslatedText(
+              'Select Quantity (Quintals)',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
             const SizedBox(height: 15),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -166,22 +208,31 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                     onPressed: () {
                       if (_quantity > 1) setState(() => _quantity--);
                     },
-                    icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                    icon: const Icon(
+                      Icons.remove_circle_outline,
+                      color: Colors.red,
+                    ),
                   ),
                   Text(
                     '$_quantity Qt',
-                    style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   IconButton(
                     onPressed: () {
                       setState(() => _quantity++);
                     },
-                    icon: const Icon(Icons.add_circle_outline, color: Colors.green),
+                    icon: const Icon(
+                      Icons.add_circle_outline,
+                      color: Colors.green,
+                    ),
                   ),
                 ],
               ),
             ),
-            
+
             const Spacer(),
 
             // Total Price & Button
@@ -203,10 +254,20 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      AutoTranslatedText('Total Amount', style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[600])),
+                      AutoTranslatedText(
+                        'Total Amount',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
                       Text(
                         '₹${_totalPrice.toStringAsFixed(0)}',
-                        style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green),
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
                       ),
                     ],
                   ),
@@ -218,14 +279,20 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                       onPressed: _isProcessing ? null : _confirmPurchase,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                         elevation: 5,
                       ),
                       child: _isProcessing
                           ? const CircularProgressIndicator(color: Colors.white)
                           : AutoTranslatedText(
                               'Confirm Purchase',
-                              style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                     ),
                   ),

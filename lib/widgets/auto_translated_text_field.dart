@@ -4,31 +4,36 @@ import 'package:farmer/providers/language_provider.dart';
 import 'package:farmer/services/translation_service.dart';
 
 class AutoTranslatedTextField extends StatefulWidget {
+  final TextEditingController? controller;
   final String? hintText;
   final String? labelText;
-  final TextEditingController? controller;
-  final ValueChanged<String>? onChanged;
-  final InputDecoration? decoration;
   final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final bool obscureText;
+  final TextInputType? keyboardType;
+  final Function(String)? onChanged;
   final bool filled;
   final Color? fillColor;
   final InputBorder? border;
 
   const AutoTranslatedTextField({
     super.key,
+    this.controller,
     this.hintText,
     this.labelText,
-    this.controller,
-    this.onChanged,
-    this.decoration,
     this.prefixIcon,
+    this.suffixIcon,
+    this.obscureText = false,
+    this.keyboardType,
+    this.onChanged,
     this.filled = false,
     this.fillColor,
     this.border,
   });
 
   @override
-  State<AutoTranslatedTextField> createState() => _AutoTranslatedTextFieldState();
+  State<AutoTranslatedTextField> createState() =>
+      _AutoTranslatedTextFieldState();
 }
 
 class _AutoTranslatedTextFieldState extends State<AutoTranslatedTextField> {
@@ -40,14 +45,6 @@ class _AutoTranslatedTextFieldState extends State<AutoTranslatedTextField> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateTranslations();
-  }
-
-  @override
-  void didUpdateWidget(AutoTranslatedTextField oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.hintText != widget.hintText || oldWidget.labelText != widget.labelText) {
-      _updateTranslations();
-    }
   }
 
   Future<void> _updateTranslations() async {
@@ -91,11 +88,14 @@ class _AutoTranslatedTextFieldState extends State<AutoTranslatedTextField> {
   Widget build(BuildContext context) {
     return TextField(
       controller: widget.controller,
+      obscureText: widget.obscureText,
+      keyboardType: widget.keyboardType,
       onChanged: widget.onChanged,
-      decoration: (widget.decoration ?? const InputDecoration()).copyWith(
+      decoration: InputDecoration(
         hintText: _translatedHintText ?? widget.hintText,
         labelText: _translatedLabelText ?? widget.labelText,
         prefixIcon: widget.prefixIcon,
+        suffixIcon: widget.suffixIcon,
         filled: widget.filled,
         fillColor: widget.fillColor,
         border: widget.border,
